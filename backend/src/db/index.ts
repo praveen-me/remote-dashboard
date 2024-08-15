@@ -1,10 +1,13 @@
-import { drizzle } from "drizzle-orm/planetscale-serverless";
-import { Client } from "@planetscale/database";
+import { drizzle } from "drizzle-orm/mysql2";
+import mysql from "mysql2/promise";
+import dotenv from "dotenv";
+dotenv.config();
 
-const client = new Client({
-  host: process.env.LOCAL_DB,
-  username: process.env.LOCAL_USER,
-  password: process.env.LOCAL_PASSWORD,
+import { schema } from "@/src/db/schema";
+
+export const connection = mysql.createPool(process.env.DB_URI);
+
+export const db = drizzle(connection, {
+  schema,
+  mode: "default",
 });
-
-export const db = drizzle(client);

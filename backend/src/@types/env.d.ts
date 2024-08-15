@@ -8,6 +8,7 @@ declare namespace NodeJS {
     LOCAL_DB: string;
     LOCAL_USER: string;
     LOCAL_PASSWORD: string;
+    DB_URI: string;
 
     PORT: string;
   }

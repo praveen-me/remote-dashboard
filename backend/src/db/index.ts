@@ -5,6 +5,7 @@ dotenv.config();
 
 import { schema } from "@/src/db/schema";
 
+//@ts-ignore
 export const connection = mysql.createPool(process.env.DB_URI);
 
 export const db = drizzle(connection, {

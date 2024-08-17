@@ -93,7 +93,7 @@ export const PersonalInformation = mysqlTable("PersonalInformation", {
     .primaryKey()
     .notNull(),
   name: varchar("name", { length: 255 }),
-  location: json("location"),
+  location: json("location").$type<{ city: string; country: string }>(),
   email: json("email"),
   phone: json("phone"),
   resumeId: varchar("resumeId", { length: 255 }).references(
@@ -131,7 +131,7 @@ export const UserResume = mysqlTable("UserResume", {
   reminderTasksIds: json("reminderTasksIds"),
 });
 
-export const workExperience = mysqlTable("WorkExperience", {
+export const WorkExperience = mysqlTable("WorkExperience", {
   workExperienceId: varchar("workExperienceId", { length: 255 })
     .primaryKey()
     .notNull(),
@@ -161,7 +161,7 @@ export const userResumeRelations = relations(UserResume, ({ one, many }) => ({
     fields: [UserResume.userId],
     references: [MercorUsers.userId],
   }),
-  workExperiences: many(workExperience),
+  workExperiences: many(WorkExperience),
 }));
 
 export const mercorUserSkillsRelations = relations(
@@ -197,9 +197,9 @@ export const personalInformationRelations = relations(
   })
 );
 
-export const workExperienceRelations = relations(workExperience, ({ one }) => ({
+export const workExperienceRelations = relations(WorkExperience, ({ one }) => ({
   userResume: one(UserResume, {
-    fields: [workExperience.resumeId],
+    fields: [WorkExperience.resumeId],
     references: [UserResume.resumeId],
   }),
 }));
@@ -211,7 +211,7 @@ export const schema = {
   PersonalInformation,
   Skills,
   UserResume,
-  workExperience,
+  WorkExperience,
   educationRelations,
   userResumeRelations,
   mercorUserSkillsRelations,

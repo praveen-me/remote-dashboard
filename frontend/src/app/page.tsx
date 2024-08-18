@@ -30,7 +30,21 @@ const users = [
     location: "United States",
     description:
       "The candidate is a seasoned React Developer Consultant with a track record of leading teams, enhancing resource allocation by 80%, and significantly improving development efficiency and app accessibility.",
-    skills: ["React", "React Native", "JavaScript", "HTML/CSS", "Redux"],
+    skills: [
+      "React",
+      "React Native",
+      "JavaScript",
+      "HTML/CSS",
+      "Redux",
+      "Node.js",
+      "Express",
+      "MongoDB",
+      "React",
+      "Node.js",
+      "Express",
+      "MongoDB",
+      "React",
+    ],
     availability: ["Full-time", "Part-time"],
   },
   {
@@ -40,7 +54,16 @@ const users = [
     location: "Canada",
     description:
       "Jane is an experienced Full Stack Developer with a focus on scalable solutions and performance optimization.",
-    skills: ["Node.js", "Express", "MongoDB", "React"],
+    skills: [
+      "Node.js",
+      "Express",
+      "MongoDB",
+      "React",
+      "Node.js",
+      "Express",
+      "MongoDB",
+      "React",
+    ],
     availability: ["Full-time"],
   },
 ];

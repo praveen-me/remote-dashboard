@@ -2,7 +2,7 @@ import { db } from "@/src/db";
 import { schema } from "@/src/db/schema";
 import { SearchQuery } from "@/src/routes/user";
 import { jsonExtract } from "@/src/utils/jsonExtract";
-import { and, desc, eq, like, sql } from "drizzle-orm";
+import { and, desc, eq, like, or, sql } from "drizzle-orm";
 
 const getUsers = async ({
   limit,
@@ -15,7 +15,7 @@ const getUsers = async ({
   offset?: number;
   userId?: string;
   searchType?: SearchQuery["type"];
-  searchQuery?: string;
+  searchQuery?: string | string[];
 }) => {
   // TODO: See why subquery needs the where clause it should also workout it.
   const skillsSubQuery = await db
@@ -50,17 +50,40 @@ const getUsers = async ({
     .groupBy(schema.WorkExperience.resumeId)
     .as("total_experience_subquery");
 
-  // let conditions = {};
+  let queryBySearchType = null;
+
+  if (searchQuery) {
+    if (searchType === "name" && !Array.isArray(searchQuery)) {
+      queryBySearchType = like(
+        schema.MercorUsers.name,
+        `%${searchQuery.toLowerCase()}%`
+      );
+    } else if (searchType === "skills") {
+      queryBySearchType = Array.isArray(searchQuery)
+        ? searchQuery
+            .map(
+              (skill) =>
+                sql`JSON_CONTAINS(${skillsSubQuery.skills}, ${`"${skill}"`})`
+            )
+            .reduce(
+              //@ts-ignore
+              (acc, condition) => (acc ? or(acc, condition) : condition),
+              null
+            )
+        : sql`JSON_CONTAINS(${skillsSubQuery.skills}, ${`"${searchQuery}"`})`;
+    } else if (searchType === "city" && !Array.isArray(searchQuery)) {
+      queryBySearchType = sql`JSON_UNQUOTE(JSON_EXTRACT(${schema.PersonalInformation.location}, '$.city')) = ${searchQuery}`;
+    } else if (searchType === "country" && !Array.isArray(searchQuery)) {
+      queryBySearchType = sql`JSON_UNQUOTE(JSON_EXTRACT(${schema.PersonalInformation.location}, '$.country')) = ${searchQuery}`;
+    }
+  }
 
   const condition = userId
-    ? and(
-        eq(schema.MercorUsers.userId, userId),
-        eq(schema.MercorUsers.userId, skillsSubQuery.userId)
-      )
-    : searchQuery
+    ? and(eq(schema.MercorUsers.userId, userId))
+    : queryBySearchType
     ? and(
         eq(schema.MercorUsers.userId, skillsSubQuery.userId),
-        like(schema.MercorUsers.name, sql`%${searchQuery.toLowerCase()}%`)
+        queryBySearchType || sql``
       )
     : eq(schema.MercorUsers.userId, skillsSubQuery.userId);
 
@@ -117,10 +140,6 @@ const getUsers = async ({
     })
     .from(schema.MercorUsers)
     .leftJoin(
-      skillsSubQuery,
-      eq(schema.MercorUsers.userId, skillsSubQuery.userId)
-    )
-    .leftJoin(
       schema.UserResume,
       eq(schema.MercorUsers.userId, schema.UserResume.userId)
     )
@@ -129,12 +148,18 @@ const getUsers = async ({
       eq(schema.UserResume.resumeId, schema.PersonalInformation.resumeId)
     )
     .leftJoin(
+      skillsSubQuery,
+      eq(schema.MercorUsers.userId, skillsSubQuery.userId)
+    )
+    .leftJoin(
       totalExperienceSubQuery,
       eq(schema.UserResume.resumeId, totalExperienceSubQuery.resumeId)
     )
     .where(condition)
     .limit(limit || 8)
     .offset(offset || 0);
+
+  console.log(users);
 
   return users;
 };

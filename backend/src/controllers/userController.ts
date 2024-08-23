@@ -159,8 +159,6 @@ const getUsers = async ({
     .limit(limit || 8)
     .offset(offset || 0);
 
-  console.log(users);
-
   return users;
 };
 

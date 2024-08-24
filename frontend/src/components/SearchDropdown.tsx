@@ -1,25 +1,65 @@
+import { SearchQuery, searchUsers } from "@/api";
+import { debounce } from "@/utils/helpers";
 import { useAppStore } from "@/utils/StoreProvider";
-import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import React, { useCallback, useEffect, useState } from "react";
 
 interface Tag {
   label: string;
   value: string;
 }
 
-const options = ["Name", "Cities", "Countries", "Skills"];
+const options = ["Name", "Cities", "Countries", "Skills"] as const;
+
+// Extract all values as type from options
+type Option = (typeof options)[number];
 
 const SearchDropdown: React.FC = () => {
-  const [selectedOption, setSelectedOption] = useState("Name");
+  const [selectedOption, setSelectedOption] = useState<Option>("Name");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [tags, setTags] = useState<Tag[]>([]);
 
-  const { cities, countries, skills } = useAppStore((state) => state);
+  const {
+    cities,
+    countries,
+    skills,
+    setUsers,
+    toggleSearchEnabled,
+    searchUsers: users,
+  } = useAppStore((state) => state);
 
-  const handleOptionSelect = (option: string) => {
+  const handleOptionSelect = (option: Option) => {
     setSelectedOption(option);
     setDropdownOpen(false);
   };
+
+  const debounceSearchUsersByName = useCallback(
+    debounce(async (query: string) => {
+      const { data } = await searchUsers({
+        searchQuery: query,
+        limit: 8,
+        offset: users.length,
+        searchType: selectedOption.toLowerCase()! as SearchQuery["type"],
+      });
+
+      if (data) {
+        setUsers(data.users, {
+          searchUsers: true,
+        });
+      }
+    }, 500),
+    [selectedOption]
+  );
+
+  useEffect(() => {
+    if ((selectedOption === "Name" && query) || tags.length > 0) {
+      toggleSearchEnabled(true);
+      debounceSearchUsersByName(
+        selectedOption === "Name" ? query : tags.map((tag) => tag.value)
+      );
+    }
+  }, [query, selectedOption, tags]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(event.target.value);

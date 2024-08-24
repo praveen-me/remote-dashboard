@@ -6,11 +6,17 @@ export const defaultInitState: IAppState = {
   skills: [],
   users: {},
   allUsers: [],
+  searchEnabled: false,
+  searchUsers: [],
 };
 
 export const createAppStore = (initState: IAppState = defaultInitState) => {
   return createStore<AppStore>()((set, get) => ({
     ...initState,
+    toggleSearchEnabled: (enabled: boolean) =>
+      set({
+        searchEnabled: enabled,
+      }),
     setInitialState: (data) =>
       set((state) => {
         const cities = data.cities.map((city) => city.city);
@@ -24,12 +30,14 @@ export const createAppStore = (initState: IAppState = defaultInitState) => {
           skills,
         };
       }),
-    setUsers: (users) =>
+    setUsers: (users, config) =>
       set((state) => {
         const usersMap = users.reduce((acc, user) => {
           acc[user.userId] = user;
           return acc;
         }, {} as { [key: string]: User });
+
+        const searchUsers = config?.searchUsers || false;
 
         const stateUsers = {
           ...state.users,
@@ -39,7 +47,15 @@ export const createAppStore = (initState: IAppState = defaultInitState) => {
         return {
           ...state,
           users: stateUsers,
-          allUsers: Object.keys(stateUsers),
+          ...(searchUsers
+            ? {
+                searchUsers: state.searchEnabled
+                  ? [...state.searchUsers, ...Object.keys(usersMap)]
+                  : [],
+              }
+            : {
+                allUsers: [...state.allUsers, ...Object.keys(usersMap)],
+              }),
         };
       }),
     getUser: (userId) => {

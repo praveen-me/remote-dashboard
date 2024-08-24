@@ -32,6 +32,8 @@ interface IAppState {
     [key: string]: User;
   };
   allUsers: string[];
+  searchEnabled: boolean;
+  searchUsers: string[];
 }
 
 type IAppStateActions = {
@@ -40,8 +42,14 @@ type IAppStateActions = {
     countries: GetAllCountriesAPIType["countries"];
     skills: GetAllSkillsAPIType["skills"];
   }) => void;
-  setUsers: (users: Users[]) => void;
+  setUsers: (
+    users: Users[],
+    config?: {
+      searchUsers: boolean;
+    }
+  ) => void;
   getUser: (userId: string) => User;
+  toggleSearchEnabled: (enabled: boolean) => void;
 };
 
 type AppStore = IAppState & IAppStateActions;

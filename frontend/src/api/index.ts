@@ -1,5 +1,9 @@
 import axios, { AxiosResponse } from "axios";
 
+export interface SearchQuery {
+  type: "skills" | "city" | "name" | "country";
+}
+
 export const axiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
 });
@@ -29,3 +33,18 @@ export const getAllSkills = (): Promise<
 > => {
   return axiosInstance.get<GetAllSkillsAPIType>("/skills");
 };
+
+export const searchUsers = ({
+  limit,
+  offset,
+  searchQuery,
+  searchType,
+}: {
+  limit?: number;
+  offset?: number;
+  searchType: SearchQuery["type"];
+  searchQuery: string | string[];
+}) =>
+  axiosInstance.get<{ users: User[] }>(
+    `/search?limit=${limit}&offset=${offset}&type=${searchType}&value=${searchQuery}`
+  ) as Promise<AxiosResponse<{ users: User[] }, APIErrorResponse>>;

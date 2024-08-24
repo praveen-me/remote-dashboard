@@ -1,6 +1,5 @@
 import Link from "next/link";
 import React from "react";
-import { FiMail, FiBookmark, FiShare2 } from "react-icons/fi";
 
 // Define the props for the Button component, using conditional types
 interface BaseButtonProps {

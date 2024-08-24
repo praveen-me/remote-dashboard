@@ -1,34 +1,27 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import Badge from "@/components/Badge";
 import { UserBasicInfo } from "@/components/UserBasicInfo";
+import { useAppStore } from "@/utils/StoreProvider";
 
 interface ProfileCardProps {
-  user: User;
+  user: string;
 }
 
 const ProfileCard = ({ user }: ProfileCardProps) => {
-  const currentUser = user;
+  const currentUser = useAppStore((state) => state.getUser(user));
 
-  // currentUser.availability = Object.keys(user).reduce((acc, key) => {
-
-  //   if(key === 'profilePic' || key === 'name' || key === 'experience' || key === 'location' || key === 'description' || key === 'skills' || key === 'availability') {
-  //     return acc
-  //   }
-  //   return [...acc, key]
-  // }, [])
-  12;
   return (
     <div className="mx-auto p-4 border border-gray-200 rounded-lg shadow-lg flex flex-col w-6/12 min-h-[300px] min-w-[700px] mt-8 space-y-4">
-      <UserBasicInfo user={user} showOpenLink />
+      <UserBasicInfo user={currentUser} showOpenLink />
 
-      <p className="text-sm text-gray-700">{user.description}</p>
+      <p className="text-sm text-gray-700">{currentUser.summary}</p>
 
       <div className="flex flex-1 flex-col justify-end">
         <div className="flex justify-between">
           <div className="flex flex-col w-[60%]">
             <h3 className="text-sm font-bold thext-gray-700">Expert in</h3>
             <div className="flex flex-wrap gap-2 mt-2">
-              {user.skills.map((skill) => (
+              {currentUser.skills.map((skill) => (
                 <Badge key={skill} skill={skill} />
               ))}
             </div>
@@ -38,14 +31,20 @@ const ProfileCard = ({ user }: ProfileCardProps) => {
               Commitment
             </h3>
             <div className="flex gap-2 mt-2">
-              {user.availability.map((type) => (
+              {currentUser.fullTime && (
                 <Badge
-                  key={type}
-                  skill={type}
+                  skill={"Full Time"}
                   textColor="text-black"
                   bgColor="bg-slate-300"
                 />
-              ))}
+              )}
+              {currentUser.partTime && (
+                <Badge
+                  skill={"Part Time"}
+                  textColor="text-black"
+                  bgColor="bg-slate-300"
+                />
+              )}
             </div>
           </div>
         </div>

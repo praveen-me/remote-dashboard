@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "@/styles/globals.css";
-import { StoreProvider, useAppStore } from "@/utils/StoreProvider";
+import { StoreProvider } from "@/utils/StoreProvider";
+
+import { ReactQueryClientProvider } from "@/utils/ReactQueryProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,9 +22,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <StoreProvider>
-      <Layout>{children}</Layout>
-    </StoreProvider>
+    <ReactQueryClientProvider>
+      <StoreProvider>
+        <Layout>{children}</Layout>
+      </StoreProvider>
+    </ReactQueryClientProvider>
   );
 };
 

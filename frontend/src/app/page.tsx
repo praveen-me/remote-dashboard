@@ -1,8 +1,10 @@
 "use client";
+import { getAllUsers } from "@/api";
 import Header from "@/components/Header";
 import ProfileCard from "@/components/ProfileCard";
 import { setup } from "@/utils/setup";
 import { useAppStore } from "@/utils/StoreProvider";
+import { useQuery } from "@tanstack/react-query";
 import React, { useEffect } from "react";
 
 const users = [
@@ -72,7 +74,22 @@ const users = [
 ];
 
 const Page = () => {
-  const { setInitialState } = useAppStore((state) => state);
+  const { setInitialState, setUsers, allUsers } = useAppStore((state) => state);
+  const { isLoading, data } = useQuery({
+    queryKey: ["users"],
+    queryFn: async () => {
+      const response = await getAllUsers(Number(8), Number(0));
+      return response.data;
+    },
+  });
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (data) {
+        setUsers(data.users);
+      }
+    }
+  }, [isLoading]);
 
   useEffect(() => {
     async function initializeState() {
@@ -88,12 +105,14 @@ const Page = () => {
     initializeState();
   }, [setInitialState]);
 
+  console.log(allUsers);
+
   return (
     <div className="w-full flex flex-col">
       <Header />
       <div className="min-h-screen  bg-gray-100 flex items-center justify-center">
         <div className="grid grid-cols-1 sm:grid-cols-2 place-items-center items-stretch">
-          {users.map((user, index) => (
+          {allUsers.map((user, index) => (
             <ProfileCard key={index} user={user} />
           ))}
         </div>

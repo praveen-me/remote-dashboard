@@ -4,7 +4,13 @@ export const axiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
 });
 
-export const getAllUsers = () => axiosInstance.get("/users");
+export const getAllUsers = (
+  limit?: number,
+  offset?: number
+): Promise<AxiosResponse<{ users: User[] }, APIErrorResponse>> =>
+  axiosInstance.get<{ users: User[] }>(
+    `/users?limit=${limit}&offset=${offset}`
+  );
 
 export const getAllCities = (): Promise<
   AxiosResponse<GetAllCitiesAPIType, APIErrorResponse>

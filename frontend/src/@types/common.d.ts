@@ -1,14 +1,14 @@
-interface User {
-  profilePic: string;
-  name: string;
-  experience: string;
-  location: string;
-  description: string;
-  skills: string[];
-  availability: string[];
-}
+// interface User {
+//   profilePic: string;
+//   name: string;
+//   experience: string;
+//   location: string;
+//   description: string;
+//   skills: string[];
+//   availability: string[];
+// }
 
-interface UserAPIResponse {
+interface User {
   userId: string;
   name: string;
   email: string;
@@ -31,6 +31,7 @@ interface IAppState {
   users: {
     [key: string]: User;
   };
+  allUsers: string[];
 }
 
 type IAppStateActions = {
@@ -39,6 +40,8 @@ type IAppStateActions = {
     countries: GetAllCountriesAPIType["countries"];
     skills: GetAllSkillsAPIType["skills"];
   }) => void;
+  setUsers: (users: Users[]) => void;
+  getUser: (userId: string) => User;
 };
 
 type AppStore = IAppState & IAppStateActions;
@@ -52,7 +55,7 @@ type GetAllCountriesAPIType = {
 };
 
 type GetAllSkillsAPIType = {
-  skills: { skill: string }[];
+  skills: { skillName: string }[];
 };
 
 interface APIErrorResponse {

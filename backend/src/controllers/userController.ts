@@ -156,8 +156,8 @@ const getUsers = async ({
       eq(schema.UserResume.resumeId, totalExperienceSubQuery.resumeId)
     )
     .where(condition)
-    .limit(limit || 8)
-    .offset(offset || 0);
+    .limit(+(limit || 8))
+    .offset(+(offset || 0));
 
   return users;
 };

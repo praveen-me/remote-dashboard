@@ -25,10 +25,12 @@ userRouter.get(
   async (req: Request<UserParams, {}, {}, PaginationQuery>, res: Response) => {
     const { offset, limit } = req.query;
 
+    console.log({ limit, offset });
+
     try {
       const users = await userController.getUsers({
-        limit: limit || 8,
-        offset: offset || 0,
+        limit: limit,
+        offset: offset,
       });
 
       res.status(200).json({ users });

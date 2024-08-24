@@ -8,7 +8,7 @@ const getAllCountries = async () => {
 
   const cities = await db
     .select({
-      city: schema.WorkExperience.locationCountry,
+      country: schema.WorkExperience.locationCountry,
     })
     .from(schema.WorkExperience)
     .where(

@@ -1,6 +1,9 @@
 "use client";
+import Header from "@/components/Header";
 import ProfileCard from "@/components/ProfileCard";
-import React from "react";
+import { setup } from "@/utils/setup";
+import { useAppStore } from "@/utils/StoreProvider";
+import React, { useEffect } from "react";
 
 const users = [
   {
@@ -68,16 +71,35 @@ const users = [
   },
 ];
 
-const App = () => {
+const Page = () => {
+  const { setInitialState } = useAppStore((state) => state);
+
+  useEffect(() => {
+    async function initializeState() {
+      const [skillsData, citiesData, countriesData] = await setup();
+
+      setInitialState({
+        skills: skillsData.data.skills,
+        cities: citiesData.data.cities,
+        countries: countriesData.data.countries,
+      });
+    }
+
+    initializeState();
+  }, [setInitialState]);
+
   return (
-    <div className="min-h-screen  bg-gray-100 flex items-center justify-center">
-      <div className="grid grid-cols-1 sm:grid-cols-2 place-items-center items-stretch">
-        {users.map((user, index) => (
-          <ProfileCard key={index} user={user} />
-        ))}
+    <div className="w-full flex flex-col">
+      <Header />
+      <div className="min-h-screen  bg-gray-100 flex items-center justify-center">
+        <div className="grid grid-cols-1 sm:grid-cols-2 place-items-center items-stretch">
+          {users.map((user, index) => (
+            <ProfileCard key={index} user={user} />
+          ))}
+        </div>
       </div>
     </div>
   );
 };
 
-export default App;
+export default Page;

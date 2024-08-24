@@ -7,6 +7,16 @@ interface ProfileCardProps {
 }
 
 const ProfileCard = ({ user }: ProfileCardProps) => {
+  const currentUser = user;
+
+  // currentUser.availability = Object.keys(user).reduce((acc, key) => {
+
+  //   if(key === 'profilePic' || key === 'name' || key === 'experience' || key === 'location' || key === 'description' || key === 'skills' || key === 'availability') {
+  //     return acc
+  //   }
+  //   return [...acc, key]
+  // }, [])
+  12;
   return (
     <div className="mx-auto p-4 border border-gray-200 rounded-lg shadow-lg flex flex-col w-6/12 min-h-[300px] min-w-[700px] mt-8 space-y-4">
       <UserBasicInfo user={user} showOpenLink />
@@ -16,7 +26,7 @@ const ProfileCard = ({ user }: ProfileCardProps) => {
       <div className="flex flex-1 flex-col justify-end">
         <div className="flex justify-between">
           <div className="flex flex-col w-[60%]">
-            <h3 className="text-sm font-bold text-gray-700">Expert in</h3>
+            <h3 className="text-sm font-bold thext-gray-700">Expert in</h3>
             <div className="flex flex-wrap gap-2 mt-2">
               {user.skills.map((skill) => (
                 <Badge key={skill} skill={skill} />

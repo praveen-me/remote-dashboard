@@ -1,11 +1,12 @@
 import express, { Application, Request, Response } from "express";
 import dotenv from "dotenv";
+import bodyParser from "body-parser";
+import cors from "cors";
+
 import { requestLogger } from "@/src/utils/logger";
 import { userRouter } from "@/src/routes/user";
-import bodyParser from "body-parser";
 import { skillsRouter } from "@/src/routes/skills";
-import { countryController } from "@/src/controllers/countryController";
-import { cityController } from "@/src/controllers/cityController";
+
 import { cityRouter } from "@/src/routes/city";
 import { countryRouter } from "@/src/routes/countries";
 
@@ -13,6 +14,12 @@ dotenv.config();
 
 const app: Application = express();
 const PORT = process.env.PORT;
+
+app.use(
+  cors({
+    origin: "*",
+  })
+);
 
 app.use(requestLogger);
 

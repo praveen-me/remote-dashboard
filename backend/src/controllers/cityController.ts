@@ -3,7 +3,7 @@ import { schema } from "@/src/db/schema";
 import { and, isNotNull, notInArray } from "drizzle-orm";
 
 const getAllCities = async () => {
-  const invalidCities = ["N/A", "Unknown", ""];
+  const invalidCities = ["N/A", "Unknown", "", "Remote", "India"];
 
   const cities = await db
     .select({

@@ -1,29 +1,38 @@
 "use client";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+
 import { getAllUsers } from "@/api";
 import Header from "@/components/Header";
 import ProfileCard from "@/components/ProfileCard";
 import { setup } from "@/utils/setup";
 import { useAppStore } from "@/utils/StoreProvider";
-import { useQuery } from "@tanstack/react-query";
 import { Loader } from "@/components/Loader";
+import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 
 const Page = () => {
   const { setInitialState, setUsers, allUsers, searchUsers, searchEnabled } =
     useAppStore((state) => state);
-  const { isLoading, data } = useQuery({
+  const { isLoading, data, refetch } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
       const response = await getAllUsers(Number(8), allUsers.length);
       return response.data;
     },
+    enabled: true,
   });
+
+  const loadMoreUsers = useCallback(() => {
+    refetch();
+  }, []);
+
+  const loadMoreUsersRef = useIntersectionObserver(loadMoreUsers);
 
   useEffect(() => {
     if (!isLoading && data?.users) {
       setUsers(data.users);
     }
-  }, [isLoading]);
+  }, [isLoading, data]);
 
   async function initializeState() {
     const [skillsData, citiesData, countriesData] = await setup();
@@ -54,9 +63,13 @@ const Page = () => {
       ) : (
         <div className="min-h-screen  bg-gray-100 flex items-center justify-center">
           <div className="grid grid-cols-1 sm:grid-cols-2 place-items-center items-stretch">
-            {usersToRender.map((user, index) => (
-              <ProfileCard key={index} user={user} />
-            ))}
+            {usersToRender.map((user, index) =>
+              index === allUsers.length - 1 ? (
+                <ProfileCard ref={loadMoreUsersRef} key={index} user={user} />
+              ) : (
+                <ProfileCard key={index} user={user} />
+              )
+            )}
           </div>
         </div>
       )}

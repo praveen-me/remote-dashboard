@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { forwardRef, LegacyRef } from "react";
 import Badge from "@/components/Badge";
 import { UserBasicInfo } from "@/components/UserBasicInfo";
 import { useAppStore } from "@/utils/StoreProvider";
@@ -7,11 +7,17 @@ interface ProfileCardProps {
   user: string;
 }
 
-const ProfileCard = ({ user }: ProfileCardProps) => {
+const ProfileCard = forwardRef<
+  React.RefObject<HTMLDivElement>,
+  ProfileCardProps
+>(({ user }: ProfileCardProps, ref) => {
   const currentUser = useAppStore((state) => state.getUser(user));
 
   return (
-    <div className="mx-auto p-4 border border-gray-200 rounded-lg shadow-lg flex flex-col w-6/12 min-h-[300px] min-w-[700px] mt-8 space-y-4">
+    <div
+      className="mx-auto p-4 border border-gray-200 rounded-lg shadow-lg flex flex-col w-6/12 min-h-[300px] min-w-[700px] mt-8 space-y-4"
+      ref={ref as LegacyRef<HTMLDivElement>}
+    >
       <UserBasicInfo user={currentUser} showOpenLink />
 
       <p className="text-sm text-gray-700">{currentUser.summary}</p>
@@ -51,6 +57,8 @@ const ProfileCard = ({ user }: ProfileCardProps) => {
       </div>
     </div>
   );
-};
+});
+
+ProfileCard.displayName = "ProfileCard";
 
 export default ProfileCard;

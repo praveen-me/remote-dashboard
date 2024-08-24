@@ -37,8 +37,6 @@ export const createAppStore = (initState: IAppState = defaultInitState) => {
           return acc;
         }, {} as { [key: string]: User });
 
-        const searchUsers = config?.searchUsers || false;
-
         const stateUsers = {
           ...state.users,
           ...usersMap,
@@ -47,7 +45,7 @@ export const createAppStore = (initState: IAppState = defaultInitState) => {
         return {
           ...state,
           users: stateUsers,
-          ...(searchUsers
+          ...(state.searchEnabled
             ? {
                 searchUsers: state.searchEnabled
                   ? [...state.searchUsers, ...Object.keys(usersMap)]

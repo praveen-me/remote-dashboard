@@ -99,11 +99,14 @@ const getUsers = async ({
               null
             )
         : sql`JSON_CONTAINS(${skillsSubQuery.skills}, ${`"${searchQuery}"`})`;
-    } else if (searchType === "city" && !Array.isArray(searchQuery)) {
-      queryBySearchType = sql`JSON_UNQUOTE(JSON_EXTRACT(${schema.PersonalInformation.location}, '$.city')) = ${searchQuery}`;
-    } else if (searchType === "country" && !Array.isArray(searchQuery)) {
-      queryBySearchType = sql`JSON_UNQUOTE(JSON_EXTRACT(${schema.PersonalInformation.location}, '$.country')) = ${searchQuery}`;
     }
+
+    // TODO: Need to fix this logic to enable search on countries and cities
+    // else if (searchType === "city" && !Array.isArray(searchQuery)) {
+    //   queryBySearchType = sql`JSON_UNQUOTE(JSON_EXTRACT(${schema.PersonalInformation.location}, '$.city')) = ${searchQuery}`;
+    // } else if (searchType === "country" && !Array.isArray(searchQuery)) {
+    //   queryBySearchType = sql`JSON_UNQUOTE(JSON_EXTRACT(${schema.PersonalInformation.location}, '$.country')) = ${searchQuery}`;
+    // }
   }
 
   const condition = userId

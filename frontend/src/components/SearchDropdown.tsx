@@ -10,7 +10,7 @@ interface Tag {
   value: string;
 }
 
-const options = ["Name", "City", "Country", "Skills"] as const;
+const options = ["Name", "Skills"] as const;
 
 // Extract all values as type from options
 export type Option = (typeof options)[number];
@@ -22,8 +22,6 @@ const SearchDropdown: React.FC = () => {
   const [tags, setTags] = useState<Tag[]>([]);
 
   const {
-    cities,
-    countries,
     skills,
     setUsers,
     toggleSearchEnabled,
@@ -121,14 +119,6 @@ const SearchDropdown: React.FC = () => {
   };
 
   const filteredSuggestions = () => {
-    if (selectedOption === "City")
-      return cities.filter((city) =>
-        city.toLowerCase().includes(query.toLowerCase())
-      );
-    if (selectedOption === "Country")
-      return countries.filter((country) =>
-        country.toLowerCase().includes(query.toLowerCase())
-      );
     if (selectedOption === "Skills")
       return skills.filter((skill) =>
         skill.toLowerCase().includes(query.toLowerCase())

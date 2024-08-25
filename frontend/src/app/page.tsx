@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { getAllUsers } from "@/api";
@@ -29,6 +29,8 @@ const Page = () => {
     },
   });
 
+  const initialRender = useRef(true);
+
   useEffect(() => {
     if (data) {
       setUsers(data?.users);
@@ -55,6 +57,7 @@ const Page = () => {
 
   useEffect(() => {
     if (!isLoading) {
+      initialRender.current = false;
       initializeState();
     }
   }, [isLoading]);
@@ -67,7 +70,7 @@ const Page = () => {
   const intersectionObserverCb = searchEnabled ? refetchFn : loadMoreUsers;
 
   return (
-    <div className="w-full flex flex-col">
+    <div className="w-full flex flex-col min-h-full">
       <header className="bg-blue-600 p-4 flex justify-between items-center">
         <div className="text-white text-xl font-bold">Mercor Task</div>
         <div className="flex-grow mx-8">
@@ -76,10 +79,10 @@ const Page = () => {
         <div className="text-white text-xl font-bold">Settings</div>
       </header>
 
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="flex-grow flex items-center justify-center h-full">
         {
-          <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-8 w-full max-w-7xl px-4 my-8">
-            {!usersToRender.length && loader ? (
+          <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-8 w-full max-w-7xl px-4 my-8 h-full">
+            {!usersToRender.length && (loader || initialRender.current) ? (
               Array(4)
                 .fill(0)
                 .map((_, index) => <ProfileCardShimmer key={index} />)

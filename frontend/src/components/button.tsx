@@ -7,7 +7,7 @@ interface BaseButtonProps {
   startIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   onClick?: () => void;
-  variant?: "primary" | "secondary" | "icon";
+  variant?: "primary" | "secondary" | "tertiary" | "icon";
   raw?: boolean;
 }
 
@@ -39,6 +39,8 @@ const Button: React.FC<ButtonProps> = ({
     primary: "bg-blue-600 text-white hover:bg-blue-700",
     secondary:
       "bg-white text-gray-800 border border-gray-300 hover:bg-gray-100",
+    tertiary:
+      "bg-gray-50 text-gray-800 border border-gray-300 hover:bg-gray-100 font-bold",
     icon: "bg-white text-gray-800 border border-gray-300 hover:bg-gray-100 w-10 h-10",
   };
 

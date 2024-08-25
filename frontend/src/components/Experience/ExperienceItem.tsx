@@ -26,7 +26,7 @@ const ExperienceItem: React.FC<ExperienceItemProps> = ({
       {!isLast && (
         <span className="absolute left-[25px] top-[50px] bottom-0 w-px bg-gray-300 z=[-10]" />
       )}
-      <div className="flex space-x-4">
+      <div className="flex space-x-4 w-full">
         <div className="flex-shrink-0">
           <Image
             src={logoSrc}
@@ -40,7 +40,8 @@ const ExperienceItem: React.FC<ExperienceItemProps> = ({
           <div className="flex justify-between">
             <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
             <span className="text-sm text-gray-500">
-              {startDate} - {endDate}
+              {/* // TODO: Fix logic if dates are missing */}
+              {startDate && `${startDate} -`} {endDate || "Present"}
             </span>
           </div>
           <p className="text-sm text-gray-700">{company}</p>

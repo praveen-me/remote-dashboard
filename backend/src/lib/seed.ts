@@ -2,7 +2,7 @@ import { db } from "@/src/db";
 import { schema } from "@/src/db/schema";
 import { generateRandomAward } from "@/src/utils/awardsGenerator";
 import { generateRandomSummary } from "@/src/utils/summaryGenerator";
-import { eq, sql } from "drizzle-orm";
+import { eq, mapColumnsInSQLToAlias, sql } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
 async function seedSummaries() {
@@ -12,7 +12,7 @@ async function seedSummaries() {
         userId: schema.MercorUsers.userId,
       })
       .from(schema.MercorUsers)
-      .where(sql`${schema.MercorUsers.summary} is not null`);
+      .where(sql`${schema.MercorUsers.summary} is null`);
 
     // Update each user with a random summary
     for (const user of usersWithoutSummary) {
@@ -27,6 +27,7 @@ async function seedSummaries() {
 
       const totalAwards = Math.ceil(Math.random() * 5) + 1;
 
+      // Seed data for awards
       for (let index = 0; index < totalAwards; index++) {
         const award = generateRandomAward();
 

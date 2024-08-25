@@ -1,13 +1,3 @@
-// interface User {
-//   profilePic: string;
-//   name: string;
-//   experience: string;
-//   location: string;
-//   description: string;
-//   skills: string[];
-//   availability: string[];
-// }
-
 interface User {
   userId: string;
   name: string;
@@ -25,6 +15,7 @@ interface User {
   experiences?: Experience[];
   educations?: Education[];
   availability: UserAvailability[];
+  awards: string[];
 }
 
 interface UserAvailability {

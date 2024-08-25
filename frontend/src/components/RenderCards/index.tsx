@@ -16,6 +16,15 @@ export const RenderCards = memo((props: IRenderCardsProps) => {
 
   const loadMoreUsersRef = useIntersectionObserver(loadMoreUsers);
 
+  if (!userIds.length)
+    return (
+      <div className="h-full">
+        <p className="text-center text-gray-500 font-bold mt-10 text-5xl h-full">
+          No Users found! 😭
+        </p>
+      </div>
+    );
+
   return (
     <>
       {userIds.map((user, index) =>

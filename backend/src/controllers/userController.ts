@@ -2,7 +2,54 @@ import { db } from "@/src/db";
 import { schema } from "@/src/db/schema";
 import { SearchQuery } from "@/src/routes/user";
 import { jsonExtract } from "@/src/utils/jsonExtract";
-import { and, desc, eq, like, or, sql } from "drizzle-orm";
+import { desc, eq, like, or, sql } from "drizzle-orm";
+
+// const getUsers1 = async ({
+//   limit,
+//   offset,
+//   userId,
+//   searchQuery,
+//   searchType,
+// }: {
+//   limit?: number;
+//   offset?: number;
+//   userId?: string;
+//   searchType?: SearchQuery["type"];
+//   searchQuery?: string | string[];
+// }) => {
+//   // TODO: See why subquery needs the where clause it should also workout it.
+//   // const skillsSubQuery = await db
+//   //   .select({
+//   //     userId: schema.MercorUserSkills.userId,
+//   //     skills: sql<
+//   //       string[] | null
+//   //     >`IFNULL(JSON_ARRAYAGG(${schema.Skills.skillName}), NULL)`.as("skills"),
+//   //   })
+//   //   .from(schema.MercorUserSkills)
+//   //   .leftJoin(
+//   //     schema.Skills,
+//   //     eq(schema.MercorUserSkills.skillId, schema.Skills.skillId)
+//   //   )
+//   //   .where(sql`skills is null`)
+//   //   .groupBy(schema.MercorUserSkills.userId);
+//   // // .limit(8);
+//   // return skillsSubQuery;
+
+//   const personalInformationSubQuery = await db
+//     .select({
+//       userId: schema.UserResume.userId,
+//       location: schema.PersonalInformation.location,
+//     })
+//     .from(schema.PersonalInformation)
+//     .innerJoin(
+//       schema.UserResume,
+//       eq(schema.PersonalInformation.resumeId, schema.UserResume.resumeId)
+//     )
+//     .groupBy(schema.UserResume.userId, schema.PersonalInformation.location)
+//     .as("personal_information_subquery");
+
+//   return personalInformationSubQuery;
+// };
 
 const getUsers = async ({
   limit,
@@ -35,7 +82,7 @@ const getUsers = async ({
 
   const totalExperienceSubQuery = await db
     .select({
-      resumeId: schema.WorkExperience.resumeId,
+      userId: schema.UserResume.userId,
       totalExperience:
         sql<number>`IFNULL(MAX(${schema.WorkExperience.endDate}) -
             MIN(
@@ -47,9 +94,25 @@ const getUsers = async ({
             ), 0)`.as("totalExperienceInYears"),
     })
     .from(schema.WorkExperience)
+    .innerJoin(
+      schema.UserResume,
+      eq(schema.WorkExperience.resumeId, schema.UserResume.resumeId)
+    )
     .groupBy(schema.WorkExperience.resumeId)
     .as("total_experience_subquery");
 
+  const personalInformationSubQuery = await db
+    .select({
+      userId: schema.UserResume.userId,
+      location: schema.PersonalInformation.location,
+    })
+    .from(schema.PersonalInformation)
+    .innerJoin(
+      schema.UserResume,
+      eq(schema.PersonalInformation.resumeId, schema.UserResume.resumeId)
+    )
+    .groupBy(schema.UserResume.userId, schema.PersonalInformation.location)
+    .as("personal_information_subquery");
   let queryBySearchType = null;
 
   if (searchQuery) {
@@ -79,49 +142,38 @@ const getUsers = async ({
   }
 
   const condition = userId
-    ? and(eq(schema.MercorUsers.userId, userId))
-    : queryBySearchType
-    ? and(
-        eq(schema.MercorUsers.userId, skillsSubQuery.userId),
-        queryBySearchType || sql``
-      )
-    : eq(schema.MercorUsers.userId, skillsSubQuery.userId);
-
-  const baseFields = {
-    fullTime: schema.MercorUsers.fullTime,
-    partTime: schema.MercorUsers.partTime,
-  };
+    ? eq(schema.MercorUsers.userId, userId)
+    : queryBySearchType;
 
   // Conditional selection based on userId
-  const userAvailability = userId
-    ? {
-        availability: sql<
-          {
-            type: string;
-            time: number | null;
-            salary: string | null;
-            isAvailable: boolean;
-          }[]
-        >`JSON_ARRAY(
-            JSON_OBJECT(
-              'type', 'fullTime',
-              'time', ${schema.MercorUsers.fullTimeAvailability},
-              'salary', ${schema.MercorUsers.fullTimeSalary},
-              'isAvailable', ${schema.MercorUsers.fullTime},
-              'currency', ${schema.MercorUsers.fullTimeSalaryCurrency}
-            ),
-            JSON_OBJECT(
-              'type', 'partTime',
-              'time', ${schema.MercorUsers.partTimeAvailability},
-              'salary', ${schema.MercorUsers.partTimeSalary},
-              'isAvailable', ${schema.MercorUsers.partTime},
-              'currency', ${schema.MercorUsers.partTimeSalaryCurrency}
-            )
-          )`.as("availability"),
-      }
-    : baseFields;
+  const userAvailability = {
+    availability: sql<
+      {
+        type: string;
+        time: number | null;
+        salary: string | null;
+        isAvailable: boolean;
+      }[]
+    >`JSON_ARRAY(
+        JSON_OBJECT(
+          'type', 'fullTime',
+          'time', ${schema.MercorUsers.fullTimeAvailability},
+          'salary', ${schema.MercorUsers.fullTimeSalary},
+          'isAvailable', IF(${schema.MercorUsers.fullTime} = 1, 1, 0),
+          'currency', ${schema.MercorUsers.fullTimeSalaryCurrency}
+        ),
+        JSON_OBJECT(
+          'type', 'partTime',
+          'time', ${schema.MercorUsers.partTimeAvailability},
+          'salary', ${schema.MercorUsers.partTimeSalary},
+          'isAvailable', IF(${schema.MercorUsers.partTime} = 1, 1, 0),
+          'currency', ${schema.MercorUsers.partTimeSalaryCurrency}
+        )
+      )
+`.as("availability"),
+  };
 
-  const users = await db
+  let users = db
     .select({
       userId: schema.MercorUsers.userId,
       name: schema.MercorUsers.name,
@@ -131,35 +183,45 @@ const getUsers = async ({
       createdAt: schema.MercorUsers.createdAt,
       lastLogin: schema.MercorUsers.lastLogin,
       summary: schema.MercorUsers.summary,
-      country: jsonExtract(schema.PersonalInformation.location, "$.country").as(
-        "country"
-      ),
-      skills: skillsSubQuery.skills,
-      totalExperience: totalExperienceSubQuery.totalExperience,
       ...userAvailability,
+      country: jsonExtract(
+        personalInformationSubQuery.location,
+        "$.country"
+      ).as("country"),
+      totalExperience: totalExperienceSubQuery.totalExperience,
+      skills: sql`IFNULL(${skillsSubQuery.skills}, JSON_ARRAY())`,
     })
     .from(schema.MercorUsers)
     .leftJoin(
-      schema.UserResume,
-      eq(schema.MercorUsers.userId, schema.UserResume.userId)
+      personalInformationSubQuery,
+      eq(schema.MercorUsers.userId, personalInformationSubQuery.userId)
     )
     .leftJoin(
-      schema.PersonalInformation,
-      eq(schema.UserResume.resumeId, schema.PersonalInformation.resumeId)
+      totalExperienceSubQuery,
+      eq(schema.MercorUsers.userId, totalExperienceSubQuery.userId)
     )
     .leftJoin(
       skillsSubQuery,
       eq(schema.MercorUsers.userId, skillsSubQuery.userId)
-    )
-    .leftJoin(
-      totalExperienceSubQuery,
-      eq(schema.UserResume.resumeId, totalExperienceSubQuery.resumeId)
-    )
-    .where(condition)
-    .limit(+(limit || 8))
-    .offset(+(offset || 0));
+    );
 
-  return users;
+  let total = [];
+
+  if (!userId) {
+    // TODO: Need to optimize this.
+    total = await users;
+  } else {
+    total = [1];
+  }
+
+  if (condition) {
+    users.where(condition);
+  }
+
+  users.offset(+(offset || 0)).limit(+(limit || 8));
+
+  const data = await users;
+  return { users: data, total: total.length };
 };
 
 const getUserDetailById = async (userId: string) => {
@@ -168,7 +230,7 @@ const getUserDetailById = async (userId: string) => {
   });
 
   return {
-    userBasicInfo: userBasicInfo[0],
+    userBasicInfo: userBasicInfo.users[0],
   };
 };
 
@@ -223,7 +285,7 @@ const searchUsers = async ({
   limit?: number;
   offset?: number;
   type: SearchQuery["type"];
-  value: string;
+  value: string | string[];
 }) => {
   const users = await getUsers({
     limit,

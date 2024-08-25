@@ -28,8 +28,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use("/api", userRouter);
 app.use("/api", skillsRouter);
-app.use("/api/", cityRouter);
-app.use("/api/", countryRouter);
+app.use("/api", cityRouter);
+app.use("/api", countryRouter);
+
+app.get("/", (req: Request, res: Response) => {
+  res.send("Hello World!");
+});
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

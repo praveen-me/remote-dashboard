@@ -1,4 +1,4 @@
-import React, { forwardRef, LegacyRef } from "react";
+import React, { forwardRef, LegacyRef, MutableRefObject } from "react";
 import Badge from "@/components/Badge";
 import { UserBasicInfo } from "@/components/UserBasicInfo";
 import { useAppStore } from "@/utils/StoreProvider";
@@ -8,7 +8,7 @@ interface ProfileCardProps {
 }
 
 const ProfileCard = forwardRef<
-  React.RefObject<HTMLDivElement>,
+  MutableRefObject<HTMLElement | null>,
   ProfileCardProps
 >(({ user }: ProfileCardProps, ref) => {
   const currentUser = useAppStore((state) => state.getUser(user));

@@ -1,38 +1,38 @@
 "use client";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { getAllUsers } from "@/api";
-import Header from "@/components/Header";
-import ProfileCard from "@/components/ProfileCard";
 import { setup } from "@/utils/setup";
 import { useAppStore } from "@/utils/StoreProvider";
 import { Loader } from "@/components/Loader";
-import useIntersectionObserver from "@/hooks/useIntersectionObserver";
+
+import SearchDropdown from "@/components/SearchDropdown";
+import { RenderCards } from "@/components/RenderCards";
 
 const Page = () => {
-  const { setInitialState, setUsers, allUsers, searchUsers, searchEnabled } =
-    useAppStore((state) => state);
-  const { isLoading, data, refetch } = useQuery({
+  const {
+    setInitialState,
+    setUsers,
+    allUsers,
+    searchUsers,
+    searchEnabled,
+    isLoading: loader,
+    setLoader,
+    refetchFn,
+  } = useAppStore((state) => state);
+  const { isLoading, refetch } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
       const response = await getAllUsers(Number(8), allUsers.length);
+      setUsers(response.data.users);
       return response.data;
     },
-    enabled: true,
   });
 
   const loadMoreUsers = useCallback(() => {
     refetch();
   }, []);
-
-  const loadMoreUsersRef = useIntersectionObserver(loadMoreUsers);
-
-  useEffect(() => {
-    if (!isLoading && data?.users) {
-      setUsers(data.users);
-    }
-  }, [isLoading, data]);
 
   async function initializeState() {
     const [skillsData, citiesData, countriesData] = await setup();
@@ -45,31 +45,40 @@ const Page = () => {
   }
 
   useEffect(() => {
+    setLoader(isLoading);
     if (!isLoading) {
       initializeState();
     }
-  }, [setInitialState, isLoading]);
+  }, [isLoading]);
 
-  const usersToRender = searchEnabled ? searchUsers : allUsers;
+  const usersToRender = useMemo(
+    () => (searchEnabled ? searchUsers : allUsers),
+    [searchEnabled, searchUsers, allUsers]
+  );
+
+  const intersectionObserverCb = searchEnabled ? refetchFn : loadMoreUsers;
 
   return (
     <div className="w-full flex flex-col">
-      <Header />
+      <header className="bg-blue-600 p-4 flex justify-between items-center">
+        <div className="text-white text-xl font-bold">Mercor Task</div>
+        <div className="flex-grow mx-8">
+          <SearchDropdown />
+        </div>
+        <div className="text-white text-xl font-bold">Settings</div>
+      </header>
 
-      {isLoading ? (
+      {loader ? (
         <div className="min-h-screen  bg-gray-100 flex items-center justify-center">
           <Loader />
         </div>
       ) : (
         <div className="min-h-screen  bg-gray-100 flex items-center justify-center">
           <div className="grid grid-cols-1 sm:grid-cols-2 place-items-center items-stretch">
-            {usersToRender.map((user, index) =>
-              index === allUsers.length - 1 ? (
-                <ProfileCard ref={loadMoreUsersRef} key={index} user={user} />
-              ) : (
-                <ProfileCard key={index} user={user} />
-              )
-            )}
+            <RenderCards
+              userIds={usersToRender}
+              intersectionObserverCb={intersectionObserverCb}
+            />
           </div>
         </div>
       )}

@@ -14,9 +14,6 @@ interface PaginationQuery {
 
 export interface SearchQuery {
   type: "skills" | "city" | "name" | "country";
-}
-
-interface SearchRequestBody {
   value: string;
 }
 
@@ -24,8 +21,6 @@ userRouter.get(
   "/users",
   async (req: Request<UserParams, {}, {}, PaginationQuery>, res: Response) => {
     const { offset, limit } = req.query;
-
-    console.log({ limit, offset });
 
     try {
       const users = await userController.getUsers({
@@ -101,21 +96,22 @@ userRouter.get(
 userRouter.get(
   "/search",
   async (
-    req: Request<{}, {}, SearchRequestBody, PaginationQuery & SearchQuery>,
+    req: Request<{}, {}, {}, PaginationQuery & SearchQuery>,
     res: Response
   ) => {
-    const { limit, offset, type } = req.query;
-
-    const { value } = req.body;
-
-    console.log({ value, type });
+    const { limit, offset, type, value } = req.query;
 
     try {
       const users = await userController.searchUsers({
         limit: limit || 8,
         offset: offset || 0,
         type,
-        value,
+        value:
+          type === "name"
+            ? value
+            : value.includes(",")
+            ? value.split(",")
+            : [value],
       });
 
       return res.status(200).json({ users });

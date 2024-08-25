@@ -2,7 +2,7 @@ import { SearchQuery, searchUsers } from "@/api";
 import { debounce } from "@/utils/helpers";
 import { useAppStore } from "@/utils/StoreProvider";
 import { useQuery } from "@tanstack/react-query";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 interface Tag {
   label: string;
@@ -12,7 +12,7 @@ interface Tag {
 const options = ["Name", "Cities", "Countries", "Skills"] as const;
 
 // Extract all values as type from options
-type Option = (typeof options)[number];
+export type Option = (typeof options)[number];
 
 const SearchDropdown: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState<Option>("Name");
@@ -27,37 +27,68 @@ const SearchDropdown: React.FC = () => {
     setUsers,
     toggleSearchEnabled,
     searchUsers: users,
+    setLoader,
+    setRefetchFn,
   } = useAppStore((state) => state);
+
+  const offset = useRef(0);
+
+  const { isLoading, refetch, data } = useQuery({
+    queryKey: ["search", query, tags],
+    queryFn: async () => {
+      const response = await searchUsers({
+        limit: 8,
+        offset: shouldReplace.current ? 0 : users.length,
+        searchType: selectedOption.toLowerCase()! as SearchQuery["type"],
+        searchQuery:
+          selectedOption === "Name" ? query : tags.map((tag) => tag.value),
+      });
+      return response.data;
+    },
+    enabled: false,
+  });
+
+  const shouldReplace = useRef(true);
+
+  const refetchCb = useCallback(() => {
+    shouldReplace.current = false;
+    refetch();
+  }, [users, refetch]);
+
+  useEffect(() => {
+    if (!!query || tags.length > 0) {
+      shouldReplace.current = !!query || tags.length > 0;
+      setRefetchFn(refetchCb);
+    }
+  }, [query, tags]);
+
+  useEffect(() => {
+    setLoader(isLoading);
+  }, [isLoading]);
 
   const handleOptionSelect = (option: Option) => {
     setSelectedOption(option);
     setDropdownOpen(false);
   };
 
-  const debounceSearchUsersByName = useCallback(
-    debounce(async (query: string) => {
-      const { data } = await searchUsers({
-        searchQuery: query,
-        limit: 8,
-        offset: users.length,
-        searchType: selectedOption.toLowerCase()! as SearchQuery["type"],
+  useEffect(() => {
+    if (data?.users) {
+      console.log("replace", shouldReplace.current);
+      setUsers(data.users, {
+        replace: shouldReplace.current,
       });
+    }
+  }, [data]);
 
-      if (data) {
-        setUsers(data.users, {
-          searchUsers: true,
-        });
-      }
-    }, 500),
-    [selectedOption]
-  );
+  const debounceSearch = useCallback(debounce(refetch, 400), [selectedOption]);
 
   useEffect(() => {
     if ((selectedOption === "Name" && query) || tags.length > 0) {
+      offset.current = 0;
       toggleSearchEnabled(true);
-      debounceSearchUsersByName(
-        selectedOption === "Name" ? query : tags.map((tag) => tag.value)
-      );
+      debounceSearch();
+    } else {
+      toggleSearchEnabled(false);
     }
   }, [query, selectedOption, tags]);
 

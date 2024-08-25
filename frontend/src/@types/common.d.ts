@@ -34,6 +34,8 @@ interface IAppState {
   allUsers: string[];
   searchEnabled: boolean;
   searchUsers: string[];
+  isLoading: boolean;
+  refetchFn: () => void;
 }
 
 type IAppStateActions = {
@@ -45,11 +47,13 @@ type IAppStateActions = {
   setUsers: (
     users: Users[],
     config?: {
-      searchUsers: boolean;
+      replace: boolean;
     }
   ) => void;
   getUser: (userId: string) => User;
   toggleSearchEnabled: (enabled: boolean) => void;
+  setLoader: (loading: boolean) => void;
+  setRefetchFn: (fn: () => void) => void;
 };
 
 type AppStore = IAppState & IAppStateActions;

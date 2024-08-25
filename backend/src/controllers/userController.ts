@@ -48,15 +48,18 @@ const getUsers = async ({
   const totalExperienceSubQuery = await db
     .select({
       userId: schema.UserResume.userId,
-      totalExperience:
-        sql<number>`IFNULL(MAX(${schema.WorkExperience.endDate}) -
-            MIN(
-              CASE WHEN ${schema.WorkExperience.startDate} = '' THEN
-                NULL
-              ELSE
-                CAST(${schema.WorkExperience.startDate} AS DECIMAL)
-              END
-            ), 0)`.as("totalExperienceInYears"),
+      totalExperience: sql<number>`IFNULL(
+        MAX(${schema.WorkExperience.endDate}) -
+        MIN(
+          CASE 
+            WHEN ${schema.WorkExperience.startDate} = '' THEN 
+              YEAR(CURDATE())
+            ELSE 
+              CAST(${schema.WorkExperience.startDate} AS DECIMAL)
+          END
+        ),
+        0
+      )`.as("totalExperienceInYears"),
     })
     .from(schema.WorkExperience)
     .innerJoin(
@@ -156,7 +159,7 @@ const getUsers = async ({
         personalInformationSubQuery.location,
         "$.country"
       ).as("country"),
-      totalExperience: totalExperienceSubQuery.totalExperience,
+      totalExperience: sql`IFNULL(${totalExperienceSubQuery.totalExperience}, 0)`,
       skills: sql`IFNULL(${skillsSubQuery.skills}, JSON_ARRAY())`,
       awards: sql`IFNULL(${awardsSubQuery.awards}, JSON_ARRAY())`,
     })

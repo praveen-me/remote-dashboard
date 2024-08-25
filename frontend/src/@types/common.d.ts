@@ -70,6 +70,11 @@ type GetAllSkillsAPIType = {
   skills: { skillName: string }[];
 };
 
+type GetAllUsersAPIType = {
+  users: User[];
+  total: number;
+};
+
 interface APIErrorResponse {
   message: string;
 }

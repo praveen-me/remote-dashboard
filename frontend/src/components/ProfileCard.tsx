@@ -37,7 +37,7 @@ const ProfileCard = forwardRef<
               Commitment
             </h3>
             <div className="flex gap-2 mt-2">
-              {currentUser.fullTime && (
+              {/* {currentUser.fullTime && (
                 <Badge
                   skill={"Full Time"}
                   textColor="text-black"
@@ -50,7 +50,7 @@ const ProfileCard = forwardRef<
                   textColor="text-black"
                   bgColor="bg-slate-300"
                 />
-              )}
+              )} */}
             </div>
           </div>
         </div>

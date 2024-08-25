@@ -11,8 +11,8 @@ export const axiosInstance = axios.create({
 export const getAllUsers = (
   limit?: number,
   offset?: number
-): Promise<AxiosResponse<{ users: User[] }, APIErrorResponse>> =>
-  axiosInstance.get<{ users: User[] }>(
+): Promise<AxiosResponse<GetAllUsersAPIType, APIErrorResponse>> =>
+  axiosInstance.get<GetAllUsersAPIType>(
     `/users?limit=${limit}&offset=${offset}`
   );
 

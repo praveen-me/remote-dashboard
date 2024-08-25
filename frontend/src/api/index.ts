@@ -48,3 +48,26 @@ export const searchUsers = ({
   axiosInstance.get<{ users: User[] }>(
     `/search?limit=${limit}&offset=${offset}&type=${searchType}&value=${searchQuery}`
   ) as Promise<AxiosResponse<{ users: User[] }, APIErrorResponse>>;
+
+export const getUserExperience = (
+  userId: string
+): Promise<AxiosResponse<{ workExperiences: Experience }, APIErrorResponse>> =>
+  axiosInstance.get<{ workExperiences: Experience }>(
+    `/users/${userId}/experience`
+  );
+
+export const getUserEducation = (
+  userId: string
+): Promise<AxiosResponse<{ workExperiences: Experience }, APIErrorResponse>> =>
+  axiosInstance.get<{ workExperiences: Experience }>(
+    `/users/${userId}/education`
+  );
+
+export const getUserBasicInfo = (
+  userId: string
+): Promise<
+  AxiosResponse<{ user: { userBasicInfo: Partial<User> } }, APIErrorResponse>
+> =>
+  axiosInstance.get<{ user: { userBasicInfo: Partial<User> } }>(
+    `/users/${userId}/basic`
+  );

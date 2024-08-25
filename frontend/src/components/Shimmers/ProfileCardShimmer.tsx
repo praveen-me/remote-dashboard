@@ -2,7 +2,7 @@ import React from "react";
 
 const ProfileCardShimmer = () => {
   return (
-    <div className="mx-auto p-6 border border-gray-200 rounded-lg shadow-lg flex flex-col w-full md:w-[700px] min-h-[300px] space-y-4 my-8 bg-white animate-pulse">
+    <div className="p-4 border border-gray-200 rounded-lg shadow-lg flex flex-col w-full bg-white space-y-4 min-h-[300px] my-8animate-pulse">
       <div className="flex items-center space-x-4">
         <div className="flex-shrink-0">
           <div className="w-16 h-16 bg-gray-300 rounded-full"></div>

@@ -3,13 +3,14 @@ import { debounce } from "@/utils/helpers";
 import { useAppStore } from "@/utils/StoreProvider";
 import { useQuery } from "@tanstack/react-query";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { FaChevronDown } from "react-icons/fa";
 
 interface Tag {
   label: string;
   value: string;
 }
 
-const options = ["Name", "Cities", "Countries", "Skills"] as const;
+const options = ["Name", "City", "Country", "Skills"] as const;
 
 // Extract all values as type from options
 export type Option = (typeof options)[number];
@@ -32,8 +33,9 @@ const SearchDropdown: React.FC = () => {
   } = useAppStore((state) => state);
 
   const offset = useRef(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const { isLoading, refetch, data } = useQuery({
+  const { isLoading, refetch, data, isRefetching } = useQuery({
     queryKey: ["search", query, tags],
     queryFn: async () => {
       const response = await searchUsers({
@@ -63,8 +65,8 @@ const SearchDropdown: React.FC = () => {
   }, [query, tags]);
 
   useEffect(() => {
-    setLoader(isLoading);
-  }, [isLoading]);
+    setLoader(isLoading || isRefetching);
+  }, [isLoading, isRefetching]);
 
   const handleOptionSelect = (option: Option) => {
     setSelectedOption(option);
@@ -73,24 +75,34 @@ const SearchDropdown: React.FC = () => {
 
   useEffect(() => {
     if (data?.users) {
-      console.log("replace", shouldReplace.current);
       setUsers(data.users, {
         replace: shouldReplace.current,
       });
     }
   }, [data]);
 
-  const debounceSearch = useCallback(debounce(refetch, 400), [selectedOption]);
+  const debounceSearch = useCallback(debounce(refetch, 400), [refetch]);
 
   useEffect(() => {
-    if ((selectedOption === "Name" && query) || tags.length > 0) {
+    if (selectedOption === "Name" && query.length > 0) {
       offset.current = 0;
       toggleSearchEnabled(true);
       debounceSearch();
-    } else {
+    }
+  }, [query, selectedOption, debounceSearch]);
+
+  useEffect(() => {
+    if (tags.length === 0) return;
+    offset.current = 0;
+    toggleSearchEnabled(true);
+    debounceSearch();
+  }, [tags]);
+
+  useEffect(() => {
+    if (tags.length === 0 && query.length === 0) {
       toggleSearchEnabled(false);
     }
-  }, [query, selectedOption, tags]);
+  }, [tags, query]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(event.target.value);
@@ -109,11 +121,11 @@ const SearchDropdown: React.FC = () => {
   };
 
   const filteredSuggestions = () => {
-    if (selectedOption === "Cities")
+    if (selectedOption === "City")
       return cities.filter((city) =>
         city.toLowerCase().includes(query.toLowerCase())
       );
-    if (selectedOption === "Countries")
+    if (selectedOption === "Country")
       return countries.filter((country) =>
         country.toLowerCase().includes(query.toLowerCase())
       );
@@ -124,67 +136,93 @@ const SearchDropdown: React.FC = () => {
     return [];
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setDropdownOpen(false);
+      }
+    };
+
+    if (dropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownOpen]);
+
   return (
-    <div className="flex justify-center">
-      <div className="flex justify-between rounded-md w-[70%] h-auto bg-white h-10">
-        <div className="flex flex-wrap">
-          {tags.map((tag) => (
-            <span
-              key={tag.value}
-              className="bg-blue-400 text-white text-sm rounded-full px-2 py-1 m-1 flex items-center"
-            >
-              {tag.label}
-              <button
-                onClick={() => handleTagRemove(tag.value)}
-                className="ml-1 text-xs"
+    <div className="flex justify-center mt-4" ref={containerRef}>
+      <div className="relative w-full max-w-2xl">
+        <div className="flex items-center justify-between rounded-md w-full bg-white border border-gray-300 p-2">
+          <div className="flex flex-wrap">
+            {tags.map((tag) => (
+              <span
+                key={tag.value}
+                className="bg-blue-400 text-white text-sm rounded-full px-2 py-1 m-1 flex items-center"
               >
-                x
-              </button>
-            </span>
-          ))}
+                {tag.label}
+                <button
+                  onClick={() => handleTagRemove(tag.value)}
+                  className="ml-1 text-xs"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+          <input
+            type="text"
+            value={query}
+            onChange={handleInputChange}
+            placeholder={`Search ${selectedOption.toLowerCase()}...`}
+            className="flex-grow outline-none px-2 py-1"
+          />
+          <button
+            onClick={() => setDropdownOpen((prev) => !prev)}
+            className="flex items-center justify-center rounded-md px-3 py-1 bg-blue-500 text-white focus:outline-none"
+          >
+            {selectedOption}
+            <FaChevronDown
+              className={`ml-2 transition-transform duration-500 ${
+                dropdownOpen ? "transform rotate-180" : ""
+              }`}
+            />
+          </button>
         </div>
-        <input
-          type="text"
-          value={query}
-          onChange={handleInputChange}
-          placeholder={`Search ${selectedOption.toLowerCase()}...`}
-          className="outline-none min-w-[50%] p-2"
-        />
-        <button
-          onClick={() => setDropdownOpen(!dropdownOpen)}
-          className="rounded-r-md w-32 text-center bg-blue-500 text-white font-bold"
-        >
-          {selectedOption}
-        </button>
+        {/* Options Dropdown */}
+        {dropdownOpen && (
+          <div className="absolute left-0 right-0 mt-1 rounded-md bg-white shadow-lg z-10 overflow-hidden">
+            {options.map((option) => (
+              <div
+                key={option}
+                onClick={() => handleOptionSelect(option)}
+                className="cursor-pointer px-4 py-2 hover:bg-gray-100 flex items-center border-b-2 border-gray-200 "
+              >
+                {option}
+              </div>
+            ))}
+          </div>
+        )}
+        {/* Suggestions List */}
+        {query && filteredSuggestions().length > 0 && (
+          <div className="absolute left-0 right-0 mt-1 rounded-md bg-white shadow-lg z-10 overflow-hidden">
+            {filteredSuggestions().map((suggestion) => (
+              <div
+                key={suggestion}
+                onClick={() => handleSuggestionSelect(suggestion)}
+                className="cursor-pointer px-4 py-2 hover:bg-gray-100 border-b-2 border-gray-200 "
+              >
+                {suggestion}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-
-      {dropdownOpen && (
-        <div className="absolute mt-2 w-[20%] rounded-md bg-white shadow-lg z-10">
-          {options.map((option) => (
-            <div
-              key={option}
-              onClick={() => handleOptionSelect(option)}
-              className="cursor-pointer px-4 py-2 hover:bg-gray-100"
-            >
-              {option}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {query && filteredSuggestions().length > 0 && (
-        <div className="absolute mt-10 w-[47.5%] rounded-md bg-white shadow-lg z-10 left-[21.9rem]">
-          {filteredSuggestions().map((suggestion) => (
-            <div
-              key={suggestion}
-              onClick={() => handleSuggestionSelect(suggestion)}
-              className="cursor-pointer px-4 py-2 hover:bg-gray-100"
-            >
-              {suggestion}
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 };

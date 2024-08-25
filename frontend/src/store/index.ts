@@ -67,6 +67,19 @@ export const createAppStore = (initState: IAppState = defaultInitState) => {
       },
       setLoader: (loading) => set({ isLoading: loading }),
       setRefetchFn: (fn: () => void) => set({ refetchFn: fn }),
+      setUser: (data) => {
+        if (!data.userId) return;
+        const state = get();
+        set({
+          users: {
+            ...state.users,
+            [data.userId]: {
+              ...(state.users[data.userId] || {}),
+              ...data,
+            },
+          },
+        });
+      },
     }))
   );
 };

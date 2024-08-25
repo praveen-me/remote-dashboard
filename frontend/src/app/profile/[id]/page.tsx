@@ -1,45 +1,80 @@
-import { LuBookmark, LuMail } from "react-icons/lu";
-
+"use client";
+import { getUserExperience, getUserEducation, getUserBasicInfo } from "@/api";
 import AvailabilityCard from "@/components/AvailablityCard";
 import Button from "@/components/button";
 import Education from "@/components/Education";
 import WorkExperience from "@/components/Experience";
 import { UserBasicInfo } from "@/components/UserBasicInfo";
+import { useAppStore } from "@/utils/StoreProvider";
+import { LuBookmark, LuMail } from "react-icons/lu";
+import { useQueries } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { Loader } from "@/components/Loader";
 
-const user = {
-  profilePic: "https://via.placeholder.com/150",
-  name: "Yash Bajaj",
-  experience: "8 years",
-  location: "United States",
-  description:
-    "The candidate is a seasoned React Developer Consultant with a track record of leading teams, enhancing resource allocation by 80%, and significantly improving development efficiency and app accessibility.",
-  skills: [
-    "React",
-    "React Native",
-    "JavaScript",
-    "HTML/CSS",
-    "Redux",
-    "Node.js",
-    "Express",
-    "MongoDB",
-    "React",
-    "Node.js",
-    "Express",
-    "MongoDB",
-    "React",
-  ],
-  availability: ["Full-time", "Part-time"],
-};
+const Skeleton = ({ width, height }: { width: string; height: string }) => (
+  <div
+    className={`animate-pulse bg-gray-300 rounded ${width} h- ${height}`}
+  ></div>
+);
 
-export default function Page({ params }: { params: { id: string } }) {
-  console.log({ id: params.id });
+const Page = ({ params }: { params: { id: string } }) => {
+  const { setUser } = useAppStore((state) => state);
+  const currentUser = useAppStore((state) => state.getUser(params.id));
+
+  const [
+    { isLoading: isLoadingBasicInfo },
+    { isLoading: isLoadingExperiences, data: userWorkExperiences },
+    { isLoading: isLoadingEducations, data: userEducations },
+  ] = useQueries({
+    queries: [
+      {
+        queryKey: ["user", params.id],
+        queryFn: async () => {
+          const response = await getUserBasicInfo(params.id);
+
+          console.log(response.data.user.userBasicInfo);
+          setUser(response.data.user.userBasicInfo);
+          return response.data;
+        },
+        enabled: !currentUser,
+      },
+      {
+        queryKey: ["experiences", params.id],
+        queryFn: () => getUserExperience(params.id).then((res) => res.data),
+        enabled: !!currentUser,
+      },
+      {
+        queryKey: ["educations", params.id],
+        queryFn: () => getUserEducation(params.id).then((res) => res.data),
+        enabled: !!currentUser,
+      },
+    ],
+  });
+
+  useEffect(() => {
+    if (!isLoadingEducations && !isLoadingExperiences) {
+      setUser({
+        userId: params.id,
+        //@ts-ignore
+        experiences: userWorkExperiences?.workExperiences || [],
+        //@ts-ignore
+        educations: userEducations?.educations || [],
+      });
+    }
+  }, [userWorkExperiences, userEducations]);
+
+  const availability = currentUser?.availability;
+
+  if (isLoadingBasicInfo) {
+    return <Loader />;
+  }
 
   return (
-    <div className="max-w-[80%] m-auto bg-white border border-gray-200  my-8 rounded shadow-lg p-8">
+    <div className="max-w-[80%] m-auto bg-white border border-gray-200 my-8 rounded shadow-lg p-8">
       <div className="mb-4">
-        <UserBasicInfo user={user} />
+        <UserBasicInfo user={currentUser} />
       </div>
-      <div className="flex gap-4 flex-row">
+      <div className="flex gap-4 flex-row h-">
         <Button
           text="Request Introduction"
           variant="primary"
@@ -50,7 +85,6 @@ export default function Page({ params }: { params: { id: string } }) {
           variant="secondary"
           startIcon={<LuBookmark size={24} />}
         />
-
         <Button
           text="Shortlist"
           rightIcon={<LuBookmark size={24} className="text-black" />}
@@ -58,19 +92,40 @@ export default function Page({ params }: { params: { id: string } }) {
         />
       </div>
       <div className="flex flex-col md:flex-row justify-between gap-4 p-4">
-        <AvailabilityCard
-          title="Full-time"
-          hours="Can start 40+ hours / week immediately"
-          salary="$781"
-        />
-        <AvailabilityCard
-          title="Part-time"
-          hours="Can start 20+ hours / week immediately"
-          salary="$434"
-        />
+        {availability &&
+          availability
+            .filter((availability) => availability.isAvailable)
+            .map((availability) => (
+              <AvailabilityCard
+                key={availability.type}
+                title={
+                  availability.type === "fullTime" ? "Full-time" : "Part-time"
+                }
+                hours={`Can start ${availability.time}+ hours / week immediately`}
+                salary={`$${availability.salary}`}
+              />
+            ))}
       </div>
-      <WorkExperience />
-      <Education />
+      <div className="my-4">
+        {isLoadingExperiences ? (
+          <Skeleton width="w-full" height="h-80" />
+        ) : (
+          Array.isArray(currentUser?.experiences) && (
+            <WorkExperience experiences={currentUser?.experiences} />
+          )
+        )}
+      </div>
+      <div className="my-4">
+        {isLoadingEducations ? (
+          <Skeleton width="w-full" height="h-80" />
+        ) : (
+          Array.isArray(currentUser?.educations) && (
+            <Education educations={currentUser?.educations} />
+          )
+        )}
+      </div>
     </div>
   );
-}
+};
+
+export default Page;

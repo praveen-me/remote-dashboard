@@ -22,6 +22,17 @@ interface User {
   totalExperience: number;
   fullTime: boolean;
   partTime: boolean;
+  experiences?: Experience[];
+  educations?: Education[];
+  availability: UserAvailability[];
+}
+
+interface UserAvailability {
+  time: null;
+  type: "partTime" | "fullTime";
+  salary: number;
+  currency: string;
+  isAvailable: number;
 }
 
 interface IAppState {
@@ -54,6 +65,7 @@ type IAppStateActions = {
   toggleSearchEnabled: (enabled: boolean) => void;
   setLoader: (loading: boolean) => void;
   setRefetchFn: (fn: () => void) => void;
+  setUser: (data: Partial<User>) => void;
 };
 
 type AppStore = IAppState & IAppStateActions;
@@ -77,4 +89,22 @@ type GetAllUsersAPIType = {
 
 interface APIErrorResponse {
   message: string;
+}
+
+interface Experience {
+  role: string;
+  company: string;
+  startDate: string;
+  endDate: string;
+  description: string;
+  locationCity: string;
+  locationCountry: string;
+}
+
+interface Education {
+  school: string;
+  degree: string;
+  startDate: string;
+  endDate: string;
+  major: string;
 }

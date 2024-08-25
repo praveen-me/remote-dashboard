@@ -5,11 +5,9 @@ import { useQuery } from "@tanstack/react-query";
 import { getAllUsers } from "@/api";
 import { setup } from "@/utils/setup";
 import { useAppStore } from "@/utils/StoreProvider";
-import { Loader } from "@/components/Loader";
 
 import SearchDropdown from "@/components/SearchDropdown";
 import { RenderCards } from "@/components/RenderCards";
-import ProfileCard from "@/components/ProfileCard";
 import ProfileCardShimmer from "@/components/Shimmers/ProfileCardShimmer";
 
 const Page = () => {
@@ -53,10 +51,13 @@ const Page = () => {
 
   useEffect(() => {
     setLoader(isLoading || isRefetching);
+  }, [isLoading, isRefetching]);
+
+  useEffect(() => {
     if (!isLoading) {
       initializeState();
     }
-  }, [isLoading, isRefetching]);
+  }, [isLoading]);
 
   const usersToRender = useMemo(
     () => (searchEnabled ? searchUsers : allUsers),
@@ -75,25 +76,27 @@ const Page = () => {
         <div className="text-white text-xl font-bold">Settings</div>
       </header>
 
-      <div className="min-h-screen  bg-gray-100 flex items-center justify-center">
-        <div className="grid grid-cols-1 sm:grid-cols-2 place-items-center items-stretch">
-          {!usersToRender.length && loader ? (
-            Array(4)
-              .fill(0)
-              .map((_, index) => <ProfileCardShimmer key={index} />)
-          ) : (
-            <>
-              <RenderCards
-                userIds={usersToRender}
-                intersectionObserverCb={intersectionObserverCb}
-              />
-              {loader &&
-                Array(2)
-                  .fill(0)
-                  .map((_, index) => <ProfileCardShimmer key={index} />)}
-            </>
-          )}
-        </div>
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        {
+          <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-8 w-full max-w-7xl px-4 my-8">
+            {!usersToRender.length && loader ? (
+              Array(4)
+                .fill(0)
+                .map((_, index) => <ProfileCardShimmer key={index} />)
+            ) : (
+              <>
+                <RenderCards
+                  userIds={usersToRender}
+                  intersectionObserverCb={intersectionObserverCb}
+                />
+                {loader &&
+                  Array(2)
+                    .fill(0)
+                    .map((_, index) => <ProfileCardShimmer key={index} />)}
+              </>
+            )}
+          </div>
+        }
       </div>
     </div>
   );

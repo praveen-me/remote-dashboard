@@ -7,6 +7,8 @@ interface UserBasicInfoProps {
 }
 
 export const UserBasicInfo = ({ user, showOpenLink }: UserBasicInfoProps) => {
+  if (!user) return;
+
   return (
     <div className="flex items-center space-x-4">
       <Image
@@ -25,7 +27,7 @@ export const UserBasicInfo = ({ user, showOpenLink }: UserBasicInfoProps) => {
             text="View profile"
             variant="primary"
             asLink
-            href="/profile/7969"
+            href={`/profile/${user.userId}`}
           />
         )}
       </div>

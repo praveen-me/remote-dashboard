@@ -4,53 +4,6 @@ import { SearchQuery } from "@/src/routes/user";
 import { jsonExtract } from "@/src/utils/jsonExtract";
 import { desc, eq, like, or, sql } from "drizzle-orm";
 
-// const getUsers1 = async ({
-//   limit,
-//   offset,
-//   userId,
-//   searchQuery,
-//   searchType,
-// }: {
-//   limit?: number;
-//   offset?: number;
-//   userId?: string;
-//   searchType?: SearchQuery["type"];
-//   searchQuery?: string | string[];
-// }) => {
-//   // TODO: See why subquery needs the where clause it should also workout it.
-//   // const skillsSubQuery = await db
-//   //   .select({
-//   //     userId: schema.MercorUserSkills.userId,
-//   //     skills: sql<
-//   //       string[] | null
-//   //     >`IFNULL(JSON_ARRAYAGG(${schema.Skills.skillName}), NULL)`.as("skills"),
-//   //   })
-//   //   .from(schema.MercorUserSkills)
-//   //   .leftJoin(
-//   //     schema.Skills,
-//   //     eq(schema.MercorUserSkills.skillId, schema.Skills.skillId)
-//   //   )
-//   //   .where(sql`skills is null`)
-//   //   .groupBy(schema.MercorUserSkills.userId);
-//   // // .limit(8);
-//   // return skillsSubQuery;
-
-//   const personalInformationSubQuery = await db
-//     .select({
-//       userId: schema.UserResume.userId,
-//       location: schema.PersonalInformation.location,
-//     })
-//     .from(schema.PersonalInformation)
-//     .innerJoin(
-//       schema.UserResume,
-//       eq(schema.PersonalInformation.resumeId, schema.UserResume.resumeId)
-//     )
-//     .groupBy(schema.UserResume.userId, schema.PersonalInformation.location)
-//     .as("personal_information_subquery");
-
-//   return personalInformationSubQuery;
-// };
-
 const getUsers = async ({
   limit,
   offset,
@@ -79,6 +32,18 @@ const getUsers = async ({
     )
     .groupBy(schema.MercorUserSkills.userId)
     .as("skills_subquery");
+
+  const awardsSubQuery = await db
+    .select({
+      userId: schema.Awards.userId,
+      awards: sql<
+        string[] | null
+      >`JSON_ARRAYAGG(${schema.Awards.awardName})`.as("awards"),
+    })
+    .from(schema.Awards)
+
+    .groupBy(schema.Awards.userId)
+    .as("awards_subquery");
 
   const totalExperienceSubQuery = await db
     .select({
@@ -190,12 +155,9 @@ const getUsers = async ({
       ).as("country"),
       totalExperience: totalExperienceSubQuery.totalExperience,
       skills: sql`IFNULL(${skillsSubQuery.skills}, JSON_ARRAY())`,
+      awards: sql`IFNULL(${awardsSubQuery.awards}, JSON_ARRAY())`,
     })
     .from(schema.MercorUsers)
-    .leftJoin(
-      personalInformationSubQuery,
-      eq(schema.MercorUsers.userId, personalInformationSubQuery.userId)
-    )
     .leftJoin(
       totalExperienceSubQuery,
       eq(schema.MercorUsers.userId, totalExperienceSubQuery.userId)
@@ -203,6 +165,14 @@ const getUsers = async ({
     .leftJoin(
       skillsSubQuery,
       eq(schema.MercorUsers.userId, skillsSubQuery.userId)
+    )
+    .leftJoin(
+      personalInformationSubQuery,
+      eq(schema.MercorUsers.userId, personalInformationSubQuery.userId)
+    )
+    .leftJoin(
+      awardsSubQuery,
+      eq(schema.MercorUsers.userId, awardsSubQuery.userId)
     );
 
   let total = [];

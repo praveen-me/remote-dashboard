@@ -147,6 +147,16 @@ export const WorkExperience = mysqlTable("WorkExperience", {
     { onDelete: "cascade" }
   ),
 });
+
+export const Awards = mysqlTable("Awards", {
+  awardId: varchar("awardId", { length: 255 }).primaryKey().notNull(),
+  userId: varchar("userId", { length: 255 }).references(
+    () => MercorUsers.userId,
+    { onDelete: "cascade" }
+  ),
+  awardName: text("awardName"),
+});
+
 export const educationRelations = relations(Education, ({ one }) => ({
   userResume: one(UserResume, {
     fields: [Education.resumeId],
@@ -219,4 +229,5 @@ export const schema = {
   mercorUsersRelations,
   personalInformationRelations,
   workExperienceRelations,
+  Awards,
 };

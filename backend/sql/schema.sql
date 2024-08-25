@@ -100,3 +100,10 @@ CREATE TABLE `Education` (
     FOREIGN KEY (`resumeId`) REFERENCES `UserResume`(`resumeId`) ON DELETE CASCADE,
     INDEX `education_school_index` (`school`)
 );
+
+CREATE TABLE `Awards` (
+    `awardId` VARCHAR(255) NOT NULL,
+    `awardName` TEXT,
+    `userId` VARCHAR(255),
+    FOREIGN KEY (`userId`) REFERENCES `MercorUsers`(`userId`) ON DELETE CASCADE
+);

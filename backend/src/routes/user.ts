@@ -28,7 +28,7 @@ userRouter.get(
         offset: offset,
       });
 
-      res.status(200).json({ users });
+      res.status(200).json(users);
     } catch (e) {
       console.log(e);
     }
@@ -114,7 +114,7 @@ userRouter.get(
             : [value],
       });
 
-      return res.status(200).json({ users });
+      return res.status(200).json(users);
     } catch (e) {
       console.log(e);
     }

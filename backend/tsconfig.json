@@ -7,12 +7,12 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": "./", // Point rootDir to src
     "typeRoots": ["./node_modules/@types", "./src/@types"],
     "paths": {
-      "@/src/*": ["./src/*"]
+      "@/*": ["./*"]
     }
   },
-  "include": ["."],
-  "exclude": ["node_modules"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

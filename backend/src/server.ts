@@ -1,3 +1,4 @@
+import "module-alias/register";
 import express, { Application, Request, Response } from "express";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";

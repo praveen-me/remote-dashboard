@@ -34,6 +34,8 @@ CREATE TABLE `Education` (
   CONSTRAINT `Education_ibfk_1` FOREIGN KEY (`resumeId`) REFERENCES `UserResume` (`resumeId`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+
+
 DROP TABLE IF EXISTS `MercorUsers`;
 CREATE TABLE `MercorUsers` (
   `userId` varchar(255) NOT NULL,
@@ -70,6 +72,15 @@ CREATE TABLE `MercorUsers` (
   UNIQUE KEY `email` (`email`),
   UNIQUE KEY `referralCode` (`referralCode`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+DROP TABLE IF EXISTS `Awards`;
+CREATE TABLE `Awards` (
+    `awardId` VARCHAR(255) NOT NULL,
+    `awardName` TEXT,
+    `userId` VARCHAR(255),
+    PRIMARY KEY (`awardId`),
+    FOREIGN KEY (`userId`) REFERENCES `MercorUsers`(`userId`) ON DELETE CASCADE
+);
 
 DROP TABLE IF EXISTS `MercorUserSkills`;
 CREATE TABLE `MercorUserSkills` (
@@ -1979,6 +1990,19 @@ INSERT INTO `WorkExperience` (`workExperienceId`, `company`, `role`, `startDate`
 ('fda0b0a6-a905-4d49-a1c2-129aec3ed5ae', 'Best Buy, USA', 'Java Programmer', '2020', '2021', 'Designed and developed the Presentation layer using Angular and written logics using Typescript', 'Richfield', '', '50f55762-0da7-4999-b9c9-9006daf9f141'),
 ('fda5f8fb-2758-4cd9-b379-35d8fd6d9dcd', 'Revert.dev', 'Frontend development contractor', '2023', '2023', 'Worked on recreating a React.js SDK in Vue.js\n● Created the landing page for the company from a Figma design.\nTechnologies used - HTML, CSS, Next.js', 'Bengaluru', 'India', '24f3700e-aa43-407a-8526-b503b4a70155');
 
+CREATE TABLE `Education` (
+    `educationId` VARCHAR(255) NOT NULL,
+    `degree` VARCHAR(255),
+    `major` VARCHAR(255),
+    `school` VARCHAR(255),
+    `startDate` VARCHAR(255),
+    `endDate` VARCHAR(255),
+    `grade` VARCHAR(255),
+    `resumeId` VARCHAR(255),
+    PRIMARY KEY (`educationId`),
+    FOREIGN KEY (`resumeId`) REFERENCES `UserResume`(`resumeId`) ON DELETE CASCADE,
+    INDEX `education_school_index` (`school`)
+);
 
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

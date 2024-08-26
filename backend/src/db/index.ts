@@ -8,7 +8,13 @@ import { schema } from "@/src/db/schema";
 const DB = process.env.DB_URI;
 
 //@ts-ignore
-export const connection = mysql.createPool(DB);
+export const connection = mysql.createPool({
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  database: process.env.DB_NAME,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+});
 
 export const db = drizzle(connection, {
   schema,

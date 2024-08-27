@@ -1,6 +1,6 @@
 import ProfileCard from "@/components/ProfileCard";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
-import React, { memo, useCallback } from "react";
+import React, { LegacyRef, memo, RefObject, useCallback } from "react";
 
 interface IRenderCardsProps {
   userIds: string[];
@@ -29,7 +29,11 @@ export const RenderCards = memo((props: IRenderCardsProps) => {
     <>
       {userIds.map((user, index) =>
         index === userIds.length - 1 ? (
-          <ProfileCard ref={loadMoreUsersRef} key={index} user={user} />
+          <ProfileCard
+            ref={loadMoreUsersRef as LegacyRef<RefObject<HTMLDivElement>>}
+            key={index}
+            user={user}
+          />
         ) : (
           <ProfileCard key={index} user={user} />
         )

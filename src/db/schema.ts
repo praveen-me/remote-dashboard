@@ -1,4 +1,11 @@
-import { index, pgTable, serial, text, vector } from "drizzle-orm/pg-core";
+import {
+  index,
+  jsonb,
+  pgTable,
+  serial,
+  text,
+  vector,
+} from "drizzle-orm/pg-core";
 
 export const documents = pgTable(
   "documents",
@@ -6,6 +13,7 @@ export const documents = pgTable(
     id: serial("id").primaryKey(),
     content: text("content").notNull(),
     embedding: vector("embedding", { dimensions: 1536 }).notNull(),
+    metadata: jsonb("metadata"),
   },
   (table) => [
     index("embedding_idx").using(

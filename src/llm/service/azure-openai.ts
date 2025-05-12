@@ -1,10 +1,16 @@
 import { config } from "@elara/src/config";
-import { AzureOpenAI } from "@langchain/openai";
+import { AzureOpenAI, AzureOpenAIEmbeddings } from "@langchain/openai";
 
-const azureOpenAI = new AzureOpenAI({
+export const azureOpenAI = new AzureOpenAI({
   azureOpenAIApiKey: config.azureOpenAiApiKey,
   azureOpenAIEndpoint: config.azureOpenAiEndpoint,
   deploymentName: config.azureOpenAiDeployment,
-  azureOpenAIApiEmbeddingsDeploymentName: config.azureOpenAiEmbeddingDeployment,
   azureOpenAIApiVersion: config.openAiApiVersion,
+});
+
+export const azureOpenAIEmbedding = new AzureOpenAIEmbeddings({
+  azureOpenAIApiKey: config.azureOpenAiApiKey,
+  azureOpenAIApiVersion: config.openAiApiVersion,
+  azureOpenAIApiEmbeddingsDeploymentName: config.azureOpenAiEmbeddingDeployment,
+  azureOpenAIApiInstanceName: "zaidoc-openai-us-east2",
 });

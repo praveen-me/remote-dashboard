@@ -13,7 +13,7 @@ app.get("/", (_req, res) => {
   res.send("Hello from TypeScript Node.js Server! 🎉");
 });
 
-parseDocument("knowledge/elara.txt");
+// parseDocument("knowledge/elara.txt");
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);

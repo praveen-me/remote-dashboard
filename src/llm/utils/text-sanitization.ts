@@ -12,8 +12,9 @@ export const textSplitter = async (path: string) => {
     });
     const output = await splitter.createDocuments([result]);
 
-    console.log(JSON.stringify(output, null, 2), "output");
+    return output;
   } catch (error) {
     console.log(error);
+    return [];
   }
 };

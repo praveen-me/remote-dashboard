@@ -7,6 +7,6 @@ declare namespace NodeJS {
     AZURE_OPENAI_EMBEDDING_DEPLOYMENT: string;
     AZURE_OPENAI_DEPLOYMENT: string;
     OPENAI_API_VERSION: string;
-    // Add other known env vars here
+    DATABASE_URL: string;
   }
 }

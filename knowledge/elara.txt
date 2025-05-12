@@ -1,0 +1,58 @@
+Elara Support Platform - Sample FAQ Document
+
+---
+
+💡 General Platform FAQs
+
+What is Elara?
+Elara is a state-of-the-art AI support platform that provides businesses with a smart support bot. Users can upload their own knowledge base to train the bot, allowing it to respond to customer inquiries 24/7.
+
+What types of content can Elara support in the knowledge base?
+Elara supports uploading knowledge base files in various formats including .pdf, .doc, and .docx. These documents are parsed and converted into searchable, intelligent responses.
+
+Is there a size limit on uploaded files?
+Yes, each knowledge base file must be 10MB or less. This ensures fast indexing and optimal bot performance.
+
+Does Elara offer 24/7 customer support?
+Yes, Elara is available around the clock, providing immediate support responses to customer queries any time of the day.
+
+Can I test Elara before subscribing?
+Yes. Elara allows limited trial access so users can test uploading knowledge bases and experience chat responses before committing.
+
+What platforms does Elara integrate with?
+Elara can be embedded in websites, used in mobile apps, and integrated with common tools like Slack, Intercom, and custom UIs via APIs.
+
+Can Elara be trained on custom knowledge bases?
+Absolutely. Elara's core strength lies in its ability to ingest and understand custom knowledge base documents provided by the business.
+
+How secure is the document upload and processing?
+Elara processes files in a secure, encrypted environment. Files are stored temporarily for embedding and are not publicly accessible.
+
+How fast is Elara to set up?
+You can get started in minutes: create an account, upload your knowledge base, and activate your chatbot with a shareable link or embed code.
+
+What if I need help using Elara?
+Elara offers in-product guidance, documentation, and live chat support to help you with setup, uploads, and deployment.
+
+---
+
+🚀 Elara Features Overview
+
+- AI-Powered Support Bot trained on your custom knowledge base
+- Document Ingestion from Word (.docx), PDF, and other formats
+- Real-Time 24/7 Support to answer queries instantly
+- Max Upload Limit: 10MB per document
+- Multi-Language Ready (based on input)
+- Secure Processing and Storage
+- API Access for Developers
+
+---
+
+📘 Getting Started with Elara
+
+1. Sign up for an Elara account
+2. Upload your support documentation (PDF, Word, etc.)
+3. Wait a few seconds while Elara indexes your content
+4. Interact with your chatbot or embed it into your platform
+
+For additional help, contact support@elara.ai or visit our Help Center.

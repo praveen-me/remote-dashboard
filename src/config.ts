@@ -8,4 +8,5 @@ export const config = {
   azureOpenAiEmbeddingDeployment: process.env.AZURE_OPENAI_EMBEDDING_DEPLOYMENT,
   azureOpenAiDeployment: process.env.AZURE_OPENAI_DEPLOYMENT,
   openAiApiVersion: process.env.OPENAI_API_VERSION,
+  databaseUrl: process.env.DATABASE_URL,
 };

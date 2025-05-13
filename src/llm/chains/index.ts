@@ -3,29 +3,32 @@ import {
   answerUserQueryTemplate,
   standAloneQuestionTemplate,
 } from "@elara/src/llm/prompts/agent-prompts";
-import {
-  azureOpenAI,
-  getAzureOpenAI,
-} from "@elara/src/llm/service/azure-openai";
+import { getAzureOpenAI } from "@elara/src/llm/service/azure-openai";
 import {
   combineDocuments,
   generateEmbedding,
 } from "@elara/src/llm/utils/parse-document";
 import { retrieveMatchingDocuments } from "@elara/src/db/utils";
 
-import {
-  RunnablePassthrough,
-  RunnableSequence,
-} from "@langchain/core/runnables";
+import { RunnableSequence } from "@langchain/core/runnables";
 import { StringOutputParser } from "@langchain/core/output_parsers";
+
+import { formatConversationHistory } from "@elara/src/llm/utils/fomat-conversation-history";
 
 const processGetMatchingDocuments = async (input: string) => {
   const answerEmbedding = await generateEmbedding(input);
 
-  const matchedDocuments = await retrieveMatchingDocuments(answerEmbedding, 3);
+  const matchedDocuments = await retrieveMatchingDocuments(answerEmbedding, 5);
 
   return matchedDocuments.rows;
 };
+
+export type ConvoHistory = {
+  agent: string;
+  human: string;
+};
+
+const convoHistory: ConvoHistory[] = [];
 
 export const invokeStandAloneQuestionChain = async (userQuery: string) => {
   try {
@@ -34,11 +37,14 @@ export const invokeStandAloneQuestionChain = async (userQuery: string) => {
     );
 
     const standAloneQuestionChain = standAloneQuestionPrompt
-      .pipe(getAzureOpenAI({ temperature: 0.4 }))
-      .pipe(new StringOutputParser())
-      .pipe(processGetMatchingDocuments)
-      .pipe(combineDocuments)
+      .pipe(getAzureOpenAI({ temperature: 0 }))
       .pipe(new StringOutputParser());
+
+    const retrieverChain = RunnableSequence.from([
+      processGetMatchingDocuments,
+      combineDocuments,
+      new StringOutputParser(),
+    ]);
 
     const answerUserQueryPrompt = ChatPromptTemplate.fromTemplate(
       answerUserQueryTemplate
@@ -49,22 +55,29 @@ export const invokeStandAloneQuestionChain = async (userQuery: string) => {
       .pipe(new StringOutputParser());
 
     const chain = RunnableSequence.from([
-      {
-        context: standAloneQuestionChain,
-        props: new RunnablePassthrough<{
-          question: string;
-        }>(),
+      standAloneQuestionChain,
+      { context: retrieverChain },
+      (props) => {
+        return {
+          question: userQuery,
+          history: formatConversationHistory(convoHistory),
+          context: props.context,
+        };
       },
-      ({ props: { question }, context }) => ({
-        context: context,
-        question: question,
-      }),
       answerUserQueryChain,
     ]);
 
     const response = await chain.invoke({
       question: userQuery,
+      history: formatConversationHistory(convoHistory),
     });
+
+    convoHistory.push({
+      agent: response,
+      human: userQuery,
+    });
+
+    console.log(convoHistory);
 
     return response;
   } catch (e) {

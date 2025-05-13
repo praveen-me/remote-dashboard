@@ -9,4 +9,5 @@ export const config = {
   azureOpenAiDeployment: process.env.AZURE_OPENAI_DEPLOYMENT,
   openAiApiVersion: process.env.OPENAI_API_VERSION,
   databaseUrl: process.env.DATABASE_URL,
+  azureOpenAIInstanceName: process.env.AZURE_OPENAI_API_INSTANCE_NAME,
 };

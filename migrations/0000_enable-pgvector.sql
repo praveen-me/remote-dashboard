@@ -16,23 +16,22 @@ CREATE OR REPLACE FUNCTION match_documents (
   filter jsonb DEFAULT '{}'
 )
 RETURNS TABLE (
-  id bigint,
+  id integer,
   content text,
   metadata jsonb,
   similarity float
 )
 LANGUAGE plpgsql
 AS $$
-#variable_conflict use_column
 BEGIN
   RETURN QUERY
   SELECT
-    id,
-    content,
-    metadata,
+    documents.id,
+    documents.content,
+    documents.metadata,
     1 - (documents.embedding <=> query_embedding) AS similarity
   FROM documents
-  WHERE metadata @> filter
+  WHERE documents.metadata @> filter
   ORDER BY documents.embedding <=> query_embedding
   LIMIT match_count;
 END;

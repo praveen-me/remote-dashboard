@@ -19,3 +19,12 @@ export const parseDocument = async (path: string) => {
     });
   }
 };
+
+export const generateEmbedding = async (text: string) => {
+  const embedding = await azureOpenAIEmbedding.embedQuery(text);
+  return embedding;
+};
+
+export const combineDocuments = (docs: Record<string, any>[]) => {
+  return docs.map((doc: any) => doc.content).join("\n\n");
+};

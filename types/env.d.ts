@@ -8,5 +8,6 @@ declare namespace NodeJS {
     AZURE_OPENAI_DEPLOYMENT: string;
     OPENAI_API_VERSION: string;
     DATABASE_URL: string;
+    AZURE_OPENAI_API_INSTANCE_NAME: string;
   }
 }

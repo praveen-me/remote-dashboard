@@ -13,7 +13,10 @@ import {
 } from "@elara/src/llm/utils/parse-document";
 import { retrieveMatchingDocuments } from "@elara/src/db/utils";
 
-import { RunnableLambda, RunnableSequence } from "@langchain/core/runnables";
+import {
+  RunnablePassthrough,
+  RunnableSequence,
+} from "@langchain/core/runnables";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 
 const processGetMatchingDocuments = async (input: string) => {
@@ -46,10 +49,15 @@ export const invokeStandAloneQuestionChain = async (userQuery: string) => {
       .pipe(new StringOutputParser());
 
     const chain = RunnableSequence.from([
-      standAloneQuestionChain,
-      (answer) => ({
-        context: answer,
-        question: userQuery,
+      {
+        context: standAloneQuestionChain,
+        props: new RunnablePassthrough<{
+          question: string;
+        }>(),
+      },
+      ({ props: { question }, context }) => ({
+        context: context,
+        question: question,
       }),
       answerUserQueryChain,
     ]);
@@ -58,7 +66,7 @@ export const invokeStandAloneQuestionChain = async (userQuery: string) => {
       question: userQuery,
     });
 
-    console.log(response);
+    return response;
   } catch (e) {
     console.log(e);
   }
